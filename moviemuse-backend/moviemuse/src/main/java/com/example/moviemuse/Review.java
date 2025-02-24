@@ -31,4 +31,8 @@ public class Review {
     @ManyToOne
     @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
+
+    public Review(String body) {
+        this.body = body;
+    }
 }
