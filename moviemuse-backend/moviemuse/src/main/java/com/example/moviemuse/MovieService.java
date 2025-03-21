@@ -16,6 +16,11 @@ public class MovieService {
         return movieRepository.findAll();
     }
 
+    //create a movie
+    public Movie createMovie(Movie movie) {
+        return movieRepository.save(movie);
+    }
+
     //find all movies by category
     public List<Movie> findMovieByCategory(String category) {
 

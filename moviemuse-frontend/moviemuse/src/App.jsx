@@ -7,10 +7,12 @@ function App() {
 
   return (
     <Router>
+      <div className='app'>
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />}></Route>
       </Routes>
+      </div>
     </Router>
   );
 }
