@@ -3,6 +3,7 @@ package com.example.moviemuse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/moviemuse/review")
+@CrossOrigin("*")
 public class ReviewController {
     
     @Autowired
@@ -19,13 +21,13 @@ public class ReviewController {
 
     //create review
     @PostMapping
-    public ResponseEntity<Review> createReview(@RequestBody String body) {
+    public ResponseEntity<Review> createReview(@RequestBody Review review) {
 
-        return new ResponseEntity<Review>(reviewService.createReview(null), HttpStatus.CREATED);
+        return new ResponseEntity<Review>(reviewService.createReview(review), HttpStatus.CREATED);
     }
 
     //update review
-    @PutMapping
+    @PutMapping("/{id}")
     public ResponseEntity<Review> updateReview(@PathVariable Long id ,@RequestBody Review review) {
 
         return new ResponseEntity<Review>(reviewService.updateReview(id, review), HttpStatus.ACCEPTED);
