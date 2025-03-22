@@ -26,3 +26,25 @@ export const getAllMovies = async () => {
     }
   }
 };
+
+export const createMovie = async (movieData) => {
+    try {
+        const response = await api.post("", movieData, {
+            headers: {
+                "Content-Type": "application/json",
+              },
+        });
+        return response;
+    } catch (error) {
+        console.error("Create movie error:", error);
+        if (error.response) {
+            throw new Error(`Server Error: ${error.response.status}`);
+          } else if (error.request) {
+            throw new Error(
+              "Network Error - Please check if the backend server is running"
+            );
+          } else {
+            throw new Error("Request configuration Error");
+          }
+    }
+}

@@ -40,7 +40,17 @@ const Home = () => {
               <p>Loading your collection...</p>
             </div>
           ) : (
-            <div className="movies-grid"> {movies.map(movie =>(<MovieCard key={movie.id} movie={movie}/>))}{movies.length === 0 && (<p className="no-movies">No movies found. Add some to your collection!</p>)}</div>
+            <div className="movies-grid">
+              {" "}
+              {movies.map((movie) => (
+                <MovieCard key={movie.id} movie={movie} />
+              ))}
+              {movies.length === 0 && (
+                <p className="no-movies">
+                  No movies found. Add some to your collection!
+                </p>
+              )}
+            </div>
           )}
         </section>
       </div>
