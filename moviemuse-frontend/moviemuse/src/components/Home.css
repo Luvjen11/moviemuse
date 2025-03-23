@@ -10,7 +10,7 @@
   
   .home-header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
   }
   
   .page-title {
@@ -23,6 +23,31 @@
   .page-subtitle {
     color: #666666;
     font-size: 1.2rem;
+  }
+  
+  .add-movie-button-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+  }
+  
+  .add-movie-button {
+    background-color: #ff80bf;
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(255, 128, 191, 0.3);
+  }
+  
+  .add-movie-button:hover {
+    background-color: #ff5cad;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(255, 128, 191, 0.4);
   }
   
   .movie-section {
@@ -52,6 +77,13 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 25px;
+  }
+  
+  .movie-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
   }
   
   .loading-container {
@@ -88,7 +120,6 @@
     box-shadow: 0 4px 10px rgba(255, 128, 191, 0.2);
   }
   
-  /* Media Queries for Responsiveness */
   @media (max-width: 768px) {
     .movies-grid {
       grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -97,20 +128,5 @@
     
     .page-title {
       font-size: 2rem;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .movies-grid {
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 10px;
-    }
-    
-    .page-title {
-      font-size: 1.8rem;
-    }
-    
-    .page-subtitle {
-      font-size: 1rem;
     }
   }

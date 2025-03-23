@@ -32,6 +32,11 @@ const Home = () => {
           <h1 className="page-title">MovieMuse</h1>
           <p className="page-subtitle">My Movie Collection</p>
         </div>
+        <div className="add-movie-button-container">
+          <Link to="/add-movie" className="add-movie-button">
+            Add New Movie
+          </Link>
+        </div>
         <section className="movie-section">
           <h2 className="section-title">All Movies</h2>
           {loading ? (
