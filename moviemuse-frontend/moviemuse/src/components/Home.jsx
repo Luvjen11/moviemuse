@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getAllMovies } from "../services/api";
+import { deleteMovie, getAllMovies } from "../services/api";
 import MovieCard from "./MovieCard";
 import { Link } from "react-router-dom";
 import "./Home.css";
@@ -8,6 +8,7 @@ const Home = () => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [deleteLoading,setDeleteLoading] = useState(null);
 
   useEffect(() => {
     getMovies();
@@ -26,6 +27,23 @@ const Home = () => {
       setLoading(false);
     }
   };
+
+  const handleDelete = async (id)=> {
+    if (window.confirm('Are you sure you want to delete this movie?')) {
+      try {
+        // set the loading state for the specific quote
+        setDeleteLoading(id);
+        await deleteMovie(id);
+        // remove the deleted movie from the state
+        setMovies(movies.filter(movie => movie.id !== id));
+      } catch (error) {
+        console.error('Error deleting movie:', error);
+        alert(`Failed to delete movie: ${error.message}`);
+      } finally {
+        setDeleteLoading(null);
+      }
+    }
+  }
 
   return (
     <div className="home">
@@ -52,9 +70,24 @@ const Home = () => {
             <div className="movies-gallery">
               {movies.length > 0 ? (
                 movies.map((movie) => (
-                  <Link to={`/movie/${movie.id}`} key={movie.id} className="movie-link">
-                    <MovieCard movie={movie} />
-                  </Link>
+                  <div key={movie.id} className="movie-card-container">
+                    <Link to={`/movie/${movie.id}`} className="movie-link">
+                      <MovieCard 
+                        movie={movie} 
+                        isLoading={deleteLoading === movie.id}
+                      />
+                    </Link>
+                    <button
+                      className="delete-button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleDelete(movie.id);
+                      }}
+                      disabled={deleteLoading === movie.id}
+                    >
+                      ×
+                    </button>
+                  </div>
                 ))
               ) : (
                 <p className="no-movies">

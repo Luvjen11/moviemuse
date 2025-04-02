@@ -123,3 +123,20 @@ export const updateReview = async (id, reviewData) => {
     }
   }
 };
+
+//delete movie
+export const deleteMovie = async (movieId) => {
+  try {
+    const response = await api.delete(`/${movieId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Delete movie error:", error);
+    if (error.response) {
+      throw new Error(`Server Error: ${error.response.status}`);
+    } else if (error.request) {
+      throw new Error("Network Error");
+    } else {
+      throw new Error("Request configuration Error");
+    }
+  }
+};
