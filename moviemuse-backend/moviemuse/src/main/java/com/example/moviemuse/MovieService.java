@@ -56,4 +56,14 @@ public class MovieService {
         return movieRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
     }
+
+    // Delete movie by ID
+    public void deleteMovie(Long id) {
+        // Check if movie exists before deleting
+        if (!movieRepository.existsById(id)) {
+            throw new RuntimeException("Movie not found with id: " + id);
+        }
+        // Delete associated reviews first to maintain referential integrity
+        movieRepository.deleteById(id);
+    }
 }
