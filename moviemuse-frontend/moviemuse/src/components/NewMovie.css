@@ -183,3 +183,71 @@
       width: 100%;
     }
   }
+  
+  /* Add these styles to your existing NewMovie.css */
+  
+  .file-input-container {
+    position: relative;
+    margin-bottom: 10px;
+  }
+  
+  .file-input {
+    position: absolute;
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    z-index: -1;
+  }
+  
+  .file-input-label {
+    display: block;
+    background-color: #ffb3d9;
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .file-input-label:hover {
+    background-color: #ff80bf;
+  }
+  
+  .or-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 15px 0;
+    color: #666;
+  }
+  
+  .or-divider::before,
+  .or-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .or-divider span {
+    padding: 0 10px;
+  }
+  
+  .poster-preview {
+    margin-top: 15px;
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 200px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .poster-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }

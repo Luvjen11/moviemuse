@@ -1,0 +1,193 @@
+.movie-detail-container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+.movie-detail-header {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.movie-poster-container {
+  flex: 0 0 300px;
+}
+
+.movie-poster {
+  width: 100%;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(255, 128, 191, 0.3);
+}
+
+.movie-info {
+  flex: 1;
+}
+
+.movie-title {
+  color: #ff80bf;
+  font-size: 2.2rem;
+  margin-bottom: 15px;
+}
+
+.movie-episodes {
+  background-color: #ffb3d9;
+  color: white;
+  display: inline-block;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.movie-genres, .movie-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.genre-tag, .category-tag {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.genre-tag {
+  background-color: #ffe6f2;
+  color: #ff80bf;
+}
+
+.category-tag {
+  background-color: #f0f0f0;
+  color: #666666;
+}
+
+.movie-reviews-section {
+  background-color: white;
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.reviews-title {
+  color: #ff80bf;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.review-card {
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.review-rating {
+  background-color: #ff80bf;
+  color: white;
+  padding: 3px 10px;
+  border-radius: 15px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.review-content {
+  line-height: 1.6;
+}
+
+.no-reviews {
+  text-align: center;
+  color: #666666;
+  margin: 30px 0;
+}
+
+.add-review-button {
+  background-color: #ff80bf;
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.add-review-button:hover {
+  background-color: #ff5cad;
+  transform: translateY(-2px);
+}
+
+.back-to-home {
+  display: inline-block;
+  color: #ff80bf;
+  text-decoration: none;
+  margin-top: 20px;
+  font-weight: 500;
+}
+
+.back-to-home:hover {
+  text-decoration: underline;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 0;
+  color: #666666;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #ffe6f2;
+  border-top: 4px solid #ff80bf;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #d32f2f;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .movie-detail-header {
+    flex-direction: column;
+  }
+  
+  .movie-poster-container {
+    flex: 0 0 auto;
+    max-width: 250px;
+    margin: 0 auto 20px;
+  }
+  
+  .movie-title {
+    font-size: 1.8rem;
+  }
+}

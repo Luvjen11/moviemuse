@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { getAllMovies } from "../services/api";
 import MovieCard from "./MovieCard";
+import { Link } from "react-router-dom";
+import "./Home.css";
 
 const Home = () => {
   const [movies, setMovies] = useState([]);
@@ -19,7 +21,7 @@ const Home = () => {
       setError(null);
     } catch (error) {
       setError(error.message || "Something went wrong");
-      console.error("Error fetching quotes:", error);
+      console.error("Error fetching movies:", error);
     } finally {
       setLoading(false);
     }
@@ -44,13 +46,17 @@ const Home = () => {
               <div className="loading-spinner"></div>
               <p>Loading your collection...</p>
             </div>
+          ) : error ? (
+            <div className="error-message">{error}</div>
           ) : (
-            <div className="movies-grid">
-              {" "}
-              {movies.map((movie) => (
-                <MovieCard key={movie.id} movie={movie} />
-              ))}
-              {movies.length === 0 && (
+            <div className="movies-gallery">
+              {movies.length > 0 ? (
+                movies.map((movie) => (
+                  <Link to={`/movie/${movie.id}`} key={movie.id} className="movie-link">
+                    <MovieCard movie={movie} />
+                  </Link>
+                ))
+              ) : (
                 <p className="no-movies">
                   No movies found. Add some to your collection!
                 </p>

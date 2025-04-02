@@ -2,12 +2,13 @@ package com.example.moviemuse;
 
 import java.util.List;
 
-
+import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -27,7 +28,11 @@ public class Movie {
 
     private String title;
     private int episodes;
+    
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     private String poster;
+    
     @ElementCollection
     private List<String> category;
     @ElementCollection
@@ -35,5 +40,4 @@ public class Movie {
 
     @OneToMany(mappedBy = "movie")
     private List<Review> reviews;
-
 }

@@ -12,11 +12,12 @@ const NewMovie = () => {
     genres: [],
     category: []
   });
+  const [posterFile, setPosterFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
   const [genreInput, setGenreInput] = useState('');
   const [categoryInput, setCategoryInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [previewImage, setPreviewImage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,12 +25,17 @@ const NewMovie = () => {
       ...prev,
       [name]: value
     }));
-    
-    // Set preview image when poster URL changes
-    if (name === 'poster') {
-      setPreviewImage(value);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPosterFile(file);
+      // Create a preview URL for the selected image
+      const fileUrl = URL.createObjectURL(file);
+      setPreviewUrl(fileUrl);
     }
-  }; 
+  };
 
   const handleAddGenre = () => {
     if (genreInput.trim() && !movie.genres.includes(genreInput.trim())) {
@@ -71,14 +77,24 @@ const NewMovie = () => {
     setError('');
 
     try {
-      const response = await createMovie(movie);
+      // Create a FormData object to send the file
+      const formData = new FormData();
+      formData.append('title', movie.title);
+      formData.append('episodes', movie.episodes);
       
-
-      if (!response.ok) {
-        throw new Error('Failed to create movie');
+      // Add the file if it exists
+      if (posterFile) {
+        formData.append('posterFile', posterFile);
+      } else if (movie.poster) {
+        // If no file but URL exists, send the URL
+        formData.append('poster', movie.poster);
       }
+      
+      // Add arrays as JSON strings
+      formData.append('genres', JSON.stringify(movie.genres));
+      formData.append('category', JSON.stringify(movie.category));
 
-      const data = await response.json();
+      const response = await createMovie(formData);
       navigate('/');
     } catch (error) {
       setError(error.message || 'Something went wrong');
@@ -121,7 +137,25 @@ const NewMovie = () => {
         </div>
         
         <div className="form-group">
-          <label htmlFor="poster">Poster URL</label>
+          <label htmlFor="posterFile">Movie Poster</label>
+          <div className="file-input-container">
+            <input
+              type="file"
+              id="posterFile"
+              name="posterFile"
+              onChange={handleFileChange}
+              accept="image/*"
+              className="file-input"
+            />
+            <label htmlFor="posterFile" className="file-input-label">
+              {posterFile ? posterFile.name : 'Choose an image file'}
+            </label>
+          </div>
+          
+          <div className="or-divider">
+            <span>OR</span>
+          </div>
+          
           <input
             type="url"
             id="poster"
@@ -130,7 +164,13 @@ const NewMovie = () => {
             onChange={handleChange}
             placeholder="Enter poster image URL"
           />
-          {movie.poster && (
+          
+          {previewUrl && (
+            <div className="poster-preview">
+              <img src={previewUrl} alt="Poster preview" />
+            </div>
+          )}
+          {!previewUrl && movie.poster && (
             <div className="poster-preview">
               <img src={movie.poster} alt="Poster preview" />
             </div>
