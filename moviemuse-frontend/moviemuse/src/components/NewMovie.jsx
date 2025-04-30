@@ -77,31 +77,49 @@ const NewMovie = () => {
     setError('');
 
     try {
-      // Create a FormData object to send the file
-      const formData = new FormData();
-      formData.append('title', movie.title);
-      formData.append('episodes', movie.episodes);
-      
-      // Add the file if it exists
-      if (posterFile) {
-        formData.append('posterFile', posterFile);
-      } else if (movie.poster) {
-        // If no file but URL exists, send the URL
-        formData.append('poster', movie.poster);
-      }
-      
-      // Add arrays as JSON strings
-      formData.append('genres', JSON.stringify(movie.genres));
-      formData.append('category', JSON.stringify(movie.category));
+        console.log("Submitting form with data:", movie);
+        
+        // Create a FormData object to send the file
+        const formData = new FormData();
+        formData.append('title', movie.title);
+        formData.append('episodes', movie.episodes.toString());
+        
+        // Add the file if it exists
+        if (posterFile) {
+            formData.append('posterFile', posterFile);
+        } else if (movie.poster) {
+            // If no file but URL exists, send the URL
+            formData.append('poster', movie.poster);
+        }
+        
+        // Add genres as separate entries with the same name
+        if (movie.genres && movie.genres.length > 0) {
+            movie.genres.forEach(genre => {
+                formData.append('genres', genre);
+            });
+        }
+        
+        // Add categories as separate entries with the same name
+        if (movie.category && movie.category.length > 0) {
+            movie.category.forEach(category => {
+                formData.append('category', category);
+            });
+        }
+        
+        // Log the form data for debugging
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
 
-      const response = await createMovie(formData);
-      navigate('/');
+        await createMovie(formData);
+        navigate('/');
     } catch (error) {
-      setError(error.message || 'Something went wrong');
+        setError(error.message || 'Something went wrong');
+        console.error('Error details:', error);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   return (
     <div className="new-movie-container">

@@ -27,6 +27,7 @@ public class Review {
     private String body;
     private LocalDateTime created;
     private LocalDateTime updated;
+    private int rating;
 
     @ManyToOne
     @JoinColumn(name = "movie_id", nullable = false)

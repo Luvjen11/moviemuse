@@ -27,27 +27,29 @@ export const getAllMovies = async () => {
   }
 };
 
-// Update the createMovie function to handle FormData
 export const createMovie = async (movieData) => {
     try {
         // Check if movieData is FormData
         const isFormData = movieData instanceof FormData;
         
         if (isFormData) {
-            // Use the multipart endpoint
-            const response = await api.post("/upload", movieData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
+            // Use the native fetch API for FormData
+            const response = await fetch(`${API_BASE_URL}/upload`, {
+                method: 'POST',
+                body: movieData,
+                // Don't set any Content-Type header - browser will set it correctly
             });
-            return response;
+            
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error("Server response:", errorData);
+                throw new Error(`Server Error: ${response.status}`);
+            }
+            
+            return await response.json();
         } else {
             // If it's already a JSON object, send as is
-            const response = await api.post("", movieData, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+            const response = await api.post("", movieData);
             return response;
         }
     } catch (error) {
@@ -55,11 +57,9 @@ export const createMovie = async (movieData) => {
         if (error.response) {
             throw new Error(`Server Error: ${error.response.status}`);
         } else if (error.request) {
-            throw new Error(
-              "Network Error - Please check if the backend server is running"
-            );
+            throw new Error("Network Error - Please check if the backend server is running");
         } else {
-            throw new Error("Request configuration Error");
+            throw new Error(error.message || "Request configuration Error");
         }
     }
 }

@@ -2,6 +2,7 @@ package com.example.moviemuse;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,7 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/moviemuse")
 @CrossOrigin("*")
 public class MovieController {
-    
+
     @Autowired
     private MovieService movieService;
 
@@ -35,21 +37,30 @@ public class MovieController {
     // Create a new movie (JSON only)
     @PostMapping
     public ResponseEntity<Movie> createMovie(@RequestBody Movie movie) {
-        Movie createdMovie = movieService.createMovie(movie);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdMovie);
+    Movie createdMovie = movieService.createMovie(movie);
+    return ResponseEntity.status(HttpStatus.CREATED).body(createdMovie);
     }
-    
+
     // Create a new movie with file upload
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Movie> createMovieWithFile(
-            @RequestPart("title") String title,
-            @RequestPart("episodes") String episodes,
-            @RequestPart(value = "posterFile", required = false) MultipartFile posterFile,
-            @RequestPart(value = "poster", required = false) String poster,
-            @RequestPart(value = "genres", required = false) List<String> genres,
-            @RequestPart(value = "category", required = false) List<String> category) {
+            @RequestParam("title") String title,
+            @RequestParam("episodes") String episodes,
+            @RequestParam(value = "posterFile", required = false) MultipartFile posterFile,
+            @RequestParam(value = "poster", required = false) String poster,
+            @RequestParam(value = "genres", required = false) List<String> genres,
+            @RequestParam(value = "category", required = false) List<String> category) {
         
         try {
+            // Debug logging
+            System.out.println("Received upload request");
+            System.out.println("Title: " + title);
+            System.out.println("Episodes: " + episodes);
+            System.out.println("Has poster file: " + (posterFile != null));
+            System.out.println("Poster URL: " + poster);
+            System.out.println("Genres: " + genres);
+            System.out.println("Categories: " + category);
+            
             MovieDTO movieDTO = new MovieDTO();
             movieDTO.setTitle(title);
             movieDTO.setEpisodes(Integer.parseInt(episodes));
@@ -60,8 +71,9 @@ public class MovieController {
             
             Movie createdMovie = movieService.createMovieWithFile(movieDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdMovie);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
