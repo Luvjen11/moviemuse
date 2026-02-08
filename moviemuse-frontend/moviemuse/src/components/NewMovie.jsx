@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './NewMovie.css';
-import { createMovie } from '../services/api';
+import { createMovie, searchAnime, importAnime } from '../services/api';
 
 const NewMovie = () => {
   const navigate = useNavigate();
+  const [anilistQuery, setAnilistQuery] = useState('');
+  const [anilistResults, setAnilistResults] = useState([]);
+  const [anilistSearching, setAnilistSearching] = useState(false);
+  const [anilistError, setAnilistError] = useState('');
+  const [importingId, setImportingId] = useState(null);
   const [movie, setMovie] = useState({
     title: '',
     episodes: 0,
     poster: '',
     genres: [],
-    category: []
+    category: [],
+    type: 'MOVIE',
   });
   const [posterFile, setPosterFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -71,6 +77,35 @@ const NewMovie = () => {
     });
   };
 
+  const handleAnilistSearch = async () => {
+    setAnilistError('');
+    setAnilistResults([]);
+    if (!anilistQuery.trim()) return;
+    setAnilistSearching(true);
+    try {
+      const results = await searchAnime(anilistQuery);
+      setAnilistResults(Array.isArray(results) ? results : []);
+    } catch (err) {
+      setAnilistError(err.message || 'Search failed');
+      setAnilistResults([]);
+    } finally {
+      setAnilistSearching(false);
+    }
+  };
+
+  const handleImportAnime = async (anime) => {
+    setAnilistError('');
+    setImportingId(anime?.id ?? null);
+    try {
+      await importAnime(anime);
+      navigate('/');
+    } catch (err) {
+      setAnilistError(err.message || 'Import failed');
+    } finally {
+      setImportingId(null);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -83,13 +118,14 @@ const NewMovie = () => {
         const formData = new FormData();
         formData.append('title', movie.title);
         formData.append('episodes', movie.episodes.toString());
+        formData.append('type', movie.type);
         
         // Add the file if it exists
         if (posterFile) {
             formData.append('posterFile', posterFile);
-        } else if (movie.poster) {
+        } else if (movie.imageURL) {
             // If no file but URL exists, send the URL
-            formData.append('poster', movie.poster);
+            formData.append('imageURL', movie.imageURL);
         }
         
         // Add genres as separate entries with the same name
@@ -121,10 +157,63 @@ const NewMovie = () => {
     }
 };
 
+  const anilistTitle = (a) =>
+    a?.title?.english || a?.title?.romaji || 'Unknown';
+
   return (
     <div className="new-movie-container">
       <h2 className="new-movie-title">Add New Movie</h2>
-      
+
+      <section className="anilist-import-section">
+        <h3 className="anilist-import-heading">Import from AniList</h3>
+        <div className="anilist-search-row">
+          <input
+            type="text"
+            className="anilist-search-input"
+            placeholder="Search anime by title..."
+            value={anilistQuery}
+            onChange={(e) => setAnilistQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAnilistSearch())}
+          />
+          <button
+            type="button"
+            className="anilist-search-button"
+            onClick={handleAnilistSearch}
+            disabled={anilistSearching}
+          >
+            {anilistSearching ? 'Searching...' : 'Search'}
+          </button>
+        </div>
+        {anilistError && <div className="error-message">{anilistError}</div>}
+        {anilistResults.length > 0 && (
+          <ul className="anilist-results-list">
+            {anilistResults.map((a) => (
+              <li key={a.id} className="anilist-result-item">
+                <div className="anilist-result-info">
+                  {a.coverImage?.large && (
+                    <img src={a.coverImage.large} alt="" className="anilist-result-poster" />
+                  )}
+                  <div>
+                    <span className="anilist-result-title">{anilistTitle(a)}</span>
+                    {a.episodes != null && (
+                      <span className="anilist-result-meta"> · {a.episodes} ep</span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="anilist-import-button"
+                  onClick={() => handleImportAnime(a)}
+                  disabled={importingId !== null}
+                >
+                  {importingId === a.id ? 'Importing...' : 'Import'}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       {error && <div className="error-message">{error}</div>}
       
       <form className="new-movie-form" onSubmit={handleSubmit}>
@@ -140,6 +229,21 @@ const NewMovie = () => {
             placeholder="Enter movie title"
           />
         </div>
+
+        <div className="form-group">
+          <label htmlFor="type">Type</label>
+          <select
+            id="type"
+            name="type"
+            value={movie.type}
+            onChange={handleChange}
+          >
+            <option value="MOVIE">Movie</option>
+            <option value="ANIME">Anime</option>
+            <option value="KDRAMA">K-Drama</option>
+          </select>
+        </div>
+
         
         <div className="form-group">
           <label htmlFor="episodes">Episodes</label>
@@ -176,9 +280,9 @@ const NewMovie = () => {
           
           <input
             type="url"
-            id="poster"
-            name="poster"
-            value={movie.poster}
+            id="imageURL"
+            name="imageURL"
+            value={ movie.imageURL}
             onChange={handleChange}
             placeholder="Enter poster image URL"
           />
@@ -188,9 +292,9 @@ const NewMovie = () => {
               <img src={previewUrl} alt="Poster preview" />
             </div>
           )}
-          {!previewUrl && movie.poster && (
+          {!previewUrl && movie.imageURL && (
             <div className="poster-preview">
-              <img src={movie.poster} alt="Poster preview" />
+              <img src={movie.imageURL} alt="Poster preview" />
             </div>
           )}
         </div>

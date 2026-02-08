@@ -3,6 +3,8 @@ package com.example.moviemuse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.moviemuse.model.Review;
+
 @Service
 public class ReviewService {
     

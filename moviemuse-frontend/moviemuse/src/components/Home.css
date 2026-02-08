@@ -179,6 +179,29 @@
     margin-bottom: 20px;
     text-align: center;
   }
+
+  .filters-container {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+  }
+
+  .filter-button {
+    padding: 8px 16px;
+    border: 2px solid #ff80bf;
+    border-radius: 20px;
+    background: white;
+    color: #ff80bf;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .filter-button.active, .filter-button:hover {
+    background-color: #ff80bf;
+    color: white;
+  }
   
   /* Responsive styles */
   @media (max-width: 768px) {
