@@ -52,7 +52,7 @@ const MovieDetail = () => {
       <div className="movie-detail-header">
         <div className="movie-poster-container">
           <img 
-            src={movie.poster || 'https://via.placeholder.com/300x450?text=No+Image'} 
+            src={movie.imageURL|| 'https://via.placeholder.com/300x450?text=No+Image'} 
             alt={movie.title} 
             className="movie-poster"
           />

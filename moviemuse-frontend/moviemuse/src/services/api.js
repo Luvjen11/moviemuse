@@ -27,6 +27,20 @@ export const getAllMovies = async () => {
   }
 };
 
+export const searchAnime = async (query) => {
+  if (!query) return null;
+  const res = await api.get("/anilist/search/anime?query=" , {
+    params: {query}
+  });
+  return res.data;
+}
+
+export const importAnime = async (anime) => {
+  if (!anime) return null;
+  const res = await api.post("/anilist/import", anime);
+  return res.data;
+}
+
 export const createMovie = async (movieData) => {
     try {
         // Check if movieData is FormData
