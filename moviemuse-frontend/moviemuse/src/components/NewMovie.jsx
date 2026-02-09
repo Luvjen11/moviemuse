@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './NewMovie.css';
-import { createMovie, searchAnime, importAnime } from '../services/api';
+import { createMovie, searchAnime, importAnime, searchMovies, importTmdbMovie } from '../services/api';
 
 const NewMovie = () => {
   const navigate = useNavigate();
+  const [tmdbQuery, setTmdbQuery] = useState('');
+  const [tmdbResults, setTmdbResults] = useState([]);
+  const [tmdbSearching, setTmdbSearching] = useState(false);
+  const [tmdbError, setTmdbError] = useState('');
+  const [importingTmdbId, setImportingTmdbId] = useState(null);
   const [anilistQuery, setAnilistQuery] = useState('');
   const [anilistResults, setAnilistResults] = useState([]);
   const [anilistSearching, setAnilistSearching] = useState(false);
@@ -75,6 +80,35 @@ const NewMovie = () => {
       ...movie,
       category: movie.category.filter(category => category !== categoryToRemove)
     });
+  };
+
+  const handleTmdbSearch = async () => {
+    setTmdbError('');
+    setTmdbResults([]);
+    if (!tmdbQuery.trim()) return;
+    setTmdbSearching(true);
+    try {
+      const results = await searchMovies(tmdbQuery);
+      setTmdbResults(Array.isArray(results) ? results : []);
+    } catch (err) {
+      setTmdbError(err.message || 'Search failed');
+      setTmdbResults([]);
+    } finally {
+      setTmdbSearching(false);
+    }
+  };
+
+  const handleImportTmdbMovie = async (tmdbId) => {
+    setTmdbError('');
+    setImportingTmdbId(tmdbId);
+    try {
+      await importTmdbMovie(tmdbId);
+      navigate('/');
+    } catch (err) {
+      setTmdbError(err.message || 'Import failed');
+    } finally {
+      setImportingTmdbId(null);
+    }
   };
 
   const handleAnilistSearch = async () => {
@@ -160,9 +194,62 @@ const NewMovie = () => {
   const anilistTitle = (a) =>
     a?.title?.english || a?.title?.romaji || 'Unknown';
 
+  const tmdbPosterUrl = (path) =>
+    path ? `https://image.tmdb.org/t/p/w154${path}` : null;
+
   return (
     <div className="new-movie-container">
       <h2 className="new-movie-title">Add New Movie</h2>
+
+      <section className="tmdb-import-section">
+        <h3 className="tmdb-import-heading">Import from TMDB</h3>
+        <div className="tmdb-search-row">
+          <input
+            type="text"
+            className="tmdb-search-input"
+            placeholder="Search movies by title..."
+            value={tmdbQuery}
+            onChange={(e) => setTmdbQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleTmdbSearch())}
+          />
+          <button
+            type="button"
+            className="tmdb-search-button"
+            onClick={handleTmdbSearch}
+            disabled={tmdbSearching}
+          >
+            {tmdbSearching ? 'Searching...' : 'Search'}
+          </button>
+        </div>
+        {tmdbError && <div className="error-message">{tmdbError}</div>}
+        {tmdbResults.length > 0 && (
+          <ul className="tmdb-results-list">
+            {tmdbResults.map((m) => (
+              <li key={m.id} className="tmdb-result-item">
+                <div className="tmdb-result-info">
+                  {tmdbPosterUrl(m.posterPath) && (
+                    <img src={tmdbPosterUrl(m.posterPath)} alt="" className="tmdb-result-poster" />
+                  )}
+                  <div>
+                    <span className="tmdb-result-title">{m.title || 'Unknown'}</span>
+                    {m.releaseDate && m.releaseDate.length >= 4 && (
+                      <span className="tmdb-result-meta"> · {m.releaseDate.slice(0, 4)}</span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="tmdb-import-button"
+                  onClick={() => handleImportTmdbMovie(m.id)}
+                  disabled={importingTmdbId !== null}
+                >
+                  {importingTmdbId === m.id ? 'Importing...' : 'Import'}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <section className="anilist-import-section">
         <h3 className="anilist-import-heading">Import from AniList</h3>

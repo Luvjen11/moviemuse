@@ -15,7 +15,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,7 +45,10 @@ public class Movie {
     private List<String> genres = new ArrayList<>();
 
     private String status;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
+
     private Boolean inWatchlist = false;
     
     @Enumerated(EnumType.STRING)

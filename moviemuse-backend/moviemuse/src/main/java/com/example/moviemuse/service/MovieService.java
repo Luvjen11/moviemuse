@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,10 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.moviemuse.model.Movie;
 import com.example.moviemuse.model.ContentType;
 import com.example.moviemuse.repository.MovieRepository;
+import java.util.stream.Collectors;
 
 
 import com.example.moviemuse.dto.MovieDTO;
 import com.example.moviemuse.dto.anime.AniListAnime;
+import com.example.moviemuse.dto.tmdb.TmdbMovieDetails;
+
 
 @Service
 public class MovieService {
@@ -42,6 +47,47 @@ public class MovieService {
         movie.setStatus("PLANNING");
         movie.setInWatchlist(false);
         movie.setDescription(a.getDescription());
+        return movieRepository.save(movie);
+    }
+
+    // import from TMDB (idempotent: returns existing if already imported)
+    public Movie importFromTmdb(TmdbMovieDetails d) {
+        String externalId = String.valueOf(d.getId());
+        Optional<Movie> existing = movieRepository.findByExternalIdAndSource(externalId, "TMDB");
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+
+        Movie movie = new Movie();
+        movie.setTitle(d.getTitle() != null ? d.getTitle() : "Unknown");
+        movie.setEpisodes(0);
+        // Truncate if DB column is still VARCHAR(255); safe for TEXT too
+        String overview = d.getOverview();
+        final int maxDesc = 255;
+        movie.setDescription(overview == null ? null : (overview.length() > maxDesc ? overview.substring(0, maxDesc) : overview));
+        movie.setExternalId(externalId);
+        movie.setSource("TMDB");
+        movie.setType(ContentType.MOVIE);
+        movie.setStatus("PLANNING");
+        movie.setInWatchlist(false);
+
+        if (d.getPosterPath() != null && !d.getPosterPath().isBlank()) {
+            movie.setImageURL("https://image.tmdb.org/t/p/w500" + d.getPosterPath());
+        } else {
+            movie.setImageURL(null);
+        }
+
+        // genres: never null, no null names (avoids NOT NULL constraint on join table)
+        if (d.getGenres() != null && !d.getGenres().isEmpty()) {
+            List<String> names = d.getGenres().stream()
+                .map(g -> g != null ? g.getName() : null)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+            movie.setGenres(names);
+        } else {
+            movie.setGenres(new ArrayList<>());
+        }
+
         return movieRepository.save(movie);
     }
 
@@ -90,12 +136,6 @@ public class MovieService {
     }
 
 
-
-    // // Find all movies by category
-    // public List<Movie> findMovieByCategory(String category) {
-    //     return movieRepository.findMovieByCategory(category);
-    // }
-    
     // Find movie by ID
     public Movie findMovieById(Long id) {
         return movieRepository.findById(id)
