@@ -41,6 +41,20 @@ export const importAnime = async (anime) => {
   return res.data;
 }
 
+export const searchMovies = async (query) => {
+  if (!query) return [];
+  const res = await api.get("/tmdb/search/movie", { params: { query } });
+  return res.data?.results ?? [];
+};
+
+
+export const importTmdbMovie = async (tmdbId) => {
+  if (!tmdbId) throw new Error("No movie to import");
+  const res = await api.post(`/tmdb/import/${tmdbId}`);
+  return res.data;
+};
+
+
 export const createMovie = async (movieData) => {
     try {
         // Check if movieData is FormData
