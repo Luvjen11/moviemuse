@@ -1,8 +1,6 @@
 package com.example.moviemuse.controller;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -98,12 +95,6 @@ public class MovieController {
         }
     }
 
-    // // Find movie by category
-    // @GetMapping("/category/{category}")
-    // public ResponseEntity<List<Movie>> getAllMoviesByCategory(@PathVariable String category) {
-    //     List<Movie> movieCategory = movieService.findMovieByCategory(category);
-    //     return new ResponseEntity<>(movieCategory, HttpStatus.OK);
-    // }
 
     // Delete movie by ID
     @DeleteMapping("/{id}")
