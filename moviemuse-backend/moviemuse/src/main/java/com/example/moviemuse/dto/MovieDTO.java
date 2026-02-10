@@ -1,4 +1,4 @@
-package com.example.moviemuse;
+package com.example.moviemuse.dto;
 
 import java.util.List;
 
@@ -12,10 +12,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MovieDTO {
+
     private String title;
     private int episodes;
+
     private MultipartFile posterFile;
-    private String poster; // For URL or base64 string
-    private List<String> category;
-    private List<String> genres;
+    private String poster; // imageURL
+
+    private List<String> genres;     
+    private String type;              
+    private String status; 
+    private String description;
 }

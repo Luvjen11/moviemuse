@@ -9,6 +9,7 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [deleteLoading,setDeleteLoading] = useState(null);
+  const [filterType, setFilterType] = useState("ALL");
 
   useEffect(() => {
     getMovies();
@@ -34,6 +35,9 @@ const Home = () => {
         // set the loading state for the specific quote
         setDeleteLoading(id);
         await deleteMovie(id);
+        console.log("Deleting movie id:", id, typeof id);
+
+
         // remove the deleted movie from the state
         setMovies(movies.filter(movie => movie.id !== id));
       } catch (error) {
@@ -45,6 +49,12 @@ const Home = () => {
     }
   }
 
+  const filterMovie = movies.filter((movie) => {
+    if (filterType === "ALL") return true;
+    if (!movie.type) return false;
+    return movie.type.toUpperCase() === filterType;
+  })
+
   return (
     <div className="home">
       <div className="container">
@@ -52,6 +62,33 @@ const Home = () => {
           <h1 className="page-title">MovieMuse</h1>
           <p className="page-subtitle">My Movie Collection</p>
         </div>
+        <div className="filters-container">
+          <button
+            className={`filter-button ${filterType === "ALL" ? "active" : ""}`}
+            onClick={() => setFilterType("ALL")}
+          >
+            All
+          </button>
+          <button
+            className={`filter-button ${filterType === "ANIME" ? "active" : ""}`}
+            onClick={() => setFilterType("ANIME")}
+          >
+            Anime
+          </button>
+          <button
+            className={`filter-button ${filterType === "KDRAMA" ? "active" : ""}`}
+            onClick={() => setFilterType("KDRAMA")}
+          >
+            K-Drama
+          </button>
+          <button
+            className={`filter-button ${filterType === "MOVIE" ? "active" : ""}`}
+            onClick={() => setFilterType("MOVIE")}
+          >
+            Movie
+          </button>
+        </div>
+
         <div className="add-movie-button-container">
           <Link to="/add-movie" className="add-movie-button">
             Add New Movie
@@ -68,8 +105,8 @@ const Home = () => {
             <div className="error-message">{error}</div>
           ) : (
             <div className="movies-gallery">
-              {movies.length > 0 ? (
-                movies.map((movie) => (
+              {filterMovie.length > 0 ? (
+                filterMovie.map((movie) => (
                   <div key={movie.id} className="movie-card-container">
                     <Link to={`/movie/${movie.id}`} className="movie-link">
                       <MovieCard 

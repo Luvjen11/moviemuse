@@ -1,4 +1,4 @@
-package com.example.moviemuse;
+package com.example.moviemuse.model;
 
 import java.time.LocalDateTime;
 
