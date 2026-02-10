@@ -4,16 +4,19 @@
 
 ## Overview
 
-MovieMuse is a full-stack web application that allows users to create and manage a collection of movies, add reviews, and categorize films by genres and categories. It provides a seamless experience for movie enthusiasts to keep track of their favorite films and share their thoughts.
+MovieMuse is a full-stack web application for building and managing a personal collection of movies, anime, and K-dramas. Add titles by hand, import from **TMDB** (movies) or **AniList** (anime), view genres, filter by type, and write or edit reviews.
 
 ## Features
 
 - **Movie Management** – Add, view, and delete movies in your collection
-- **Image Upload** – Add movie posters via file upload or URL
-- **Categorization** – Organize movies with genres and categories
-- **Reviews** – Write and update reviews for any movie in your collection
-- **Episode Tracking** – Keep track of TV shows with episode counts
-- **Responsive Design** – Enjoy a seamless experience across devices
+- **Content Types** – Organize by type: Movie, Anime, K-Drama (filter on the home page)
+- **Import from TMDB** – Search and import movies with metadata (poster, overview, genres) from [The Movie Database](https://www.themoviedb.org/)
+- **Import from AniList** – Search and import anime with poster and genres from [AniList](https://anilist.co/)
+- **Manual Entry** – Add titles with poster (file upload or URL), genres, and type
+- **Genres** – Genres are stored and shown on cards and movie detail
+- **Reviews** – Add and update reviews (with rating) for any title
+- **Episode Tracking** – Episode count for anime and series
+- **Responsive UI** – React frontend with Vite
 
 ## Getting Started
 
@@ -24,26 +27,15 @@ git clone https://github.com/yourusername/moviemuse.git
 cd moviemuse
 ```
 
-### 2. Backend Setup (Spring Boot + MySQL)
+### 2. Backend (Spring Boot + MySQL)
 
-1. Navigate to the backend directory:
+1. Go to the backend module:
 
 ```sh
 cd moviemuse-backend/moviemuse
 ```
 
-2. Configure your MySQL database in `application.properties`:
-
-```properties
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.open-in-view=true
-spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
-spring.servlet.multipart.enabled=true
-spring.servlet.multipart.max-file-size=10MB
-spring.servlet.multipart.max-request-size=10MB
-```
-
-3. Create a `local.properties` file in the same directory with your database credentials:
+2. Create a **`local.properties`** file in the same directory (not committed) with your settings:
 
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/moviemuse
@@ -51,15 +43,23 @@ spring.datasource.username=your_username
 spring.datasource.password=your_password
 ```
 
-4. Build and run the Spring Boot application:
+3. **Optional – TMDB import:** To use “Import from TMDB”, add your [TMDB API key](https://www.themoviedb.org/settings/api):
+
+```properties
+tmdb.api.key=your_tmdb_api_key
+```
+
+4. Run the app:
 
 ```sh
 ./mvnw spring-boot:run
 ```
 
-### 3. Frontend Setup (React)
+Backend runs at **http://localhost:8080**.
 
-1. Navigate to the frontend directory:
+### 3. Frontend (React + Vite)
+
+1. Go to the frontend app:
 
 ```sh
 cd moviemuse-frontend/moviemuse
@@ -71,43 +71,64 @@ cd moviemuse-frontend/moviemuse
 npm install
 ```
 
-3. Start the development server:
+3. Start the dev server:
 
 ```sh
-npm start
+npm run dev
 ```
 
-4. Open your browser and visit `http://localhost:3000`
+4. Open **http://localhost:3000** (or the port Vite prints).
 
 ## Tech Stack
 
-- **Frontend**: React, CSS
-- **Backend**: Java, Spring Boot
-- **Database**: MySQL
-- **API Handling**: Axios
-- **Image Storage**: Base64 encoding and file uploads
+- **Frontend:** React 19, React Router, Vite, Axios, CSS
+- **Backend:** Java 17+, Spring Boot, Spring Data JPA, WebClient
+- **Database:** MySQL
+- **External APIs:** TMDB (movies), AniList GraphQL (anime)
 
 ## API Endpoints
 
-- `GET /moviemuse` – Retrieve all movies
-- `GET /moviemuse/{id}` – Get a specific movie by ID
-- `POST /moviemuse` – Add a new movie (JSON)
-- `POST /moviemuse/upload` – Add a new movie with file upload
-- `DELETE /moviemuse/{id}` – Remove a movie by ID
-- `GET /moviemuse/category/{category}` – Get movies by category
-- `POST /moviemuse/review` – Add a new review
-- `PUT /moviemuse/review/{id}` – Update an existing review
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/moviemuse` | List all movies |
+| `GET` | `/moviemuse/{id}` | Get one movie by ID |
+| `POST` | `/moviemuse` | Create a movie (JSON) |
+| `POST` | `/moviemuse/upload` | Create a movie (multipart: poster file/URL, genres, type) |
+| `DELETE` | `/moviemuse/{id}` | Delete a movie (and its reviews) |
+| `GET` | `/moviemuse/tmdb/search/movie?query=...` | Search TMDB by title |
+| `POST` | `/moviemuse/tmdb/import/{tmdbId}` | Import a movie from TMDB by ID |
+| `GET` | `/moviemuse/anilist/search/anime?query=...` | Search AniList anime |
+| `POST` | `/moviemuse/anilist/import` | Import an anime (body: AniList anime object) |
+| `POST` | `/moviemuse/review` | Create a review |
+| `PUT` | `/moviemuse/review/{id}` | Update a review |
+
+## Project Structure
+
+```
+moviemuse/
+├── moviemuse-backend/moviemuse/   # Spring Boot app
+│   └── src/main/java/.../moviemuse/
+│       ├── controller/            # Movie, Tmdb, AniList
+│       ├── service/               # Movie, Tmdb, AniList
+│       ├── repository/            # Movie, Review
+│       ├── model/                 # Movie, Review, ContentType
+│       └── dto/                   # TMDB & AniList DTOs
+├── moviemuse-frontend/moviemuse/  # Vite + React
+│   └── src/
+│       ├── components/            # Home, NewMovie, MovieDetail, etc.
+│       └── services/api.js        # API client
+└── README.md
+```
 
 ## Future Enhancements
 
-- **User Authentication** – Personal movie collections
-- **Advanced Search** – Find movies by title, genre, or rating
-- **Watchlist** – Track movies you want to watch
-- **Social Sharing** – Share your reviews with friends
-- **External API Integration** – Fetch movie data from public APIs
+- **Recommendation system** – Content-based “similar movies” (see `RECOMMENDATION_SYSTEM_PLAN.md` for a phased plan)
+- **User accounts** – Per-user collections and preferences
+- **Watchlist** – Mark titles you want to watch
+- **Advanced search** – By title, genre, or rating
 
 ## License
 
 This project is open-source and available under the [MIT License](LICENSE).
 
-*Start building your movie collection today with MovieMuse!*
+*Build your movie and anime collection with MovieMuse.*
