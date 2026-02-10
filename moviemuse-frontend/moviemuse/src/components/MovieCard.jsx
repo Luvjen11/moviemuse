@@ -6,7 +6,7 @@ const MovieCard = ({ movie }) => {
     <div className="movie-card">
       <div className="movie-card-image">
         <img 
-          src={movie.poster || 'https://via.placeholder.com/300x450?text=No+Image'} 
+          src={movie.imageURL || 'https://via.placeholder.com/300x450?text=No+Image'} 
           alt={movie.title} 
           className="movie-poster-img"
         />
