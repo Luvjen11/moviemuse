@@ -1,8 +1,28 @@
-# React + Vite
+# Recommendation Process
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## choose data
+id
+title
+genres
+description
+type
 
-Currently, two official plugins are available:
+## export data
+Option A: Export manually as JSON
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Create an endpoint like:
+GET /moviemuse
+
+Then copy/save the response as a .json file
+
+## Inspect the data before coding the model
+
+## Create a Jupyter notebook
+
+## Load the dataset with pandas
+Tasks:
+
+import pandas
+load your JSON/CSV
+preview first rows
+check null values

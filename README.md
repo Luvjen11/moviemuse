@@ -12,6 +12,7 @@ MovieMuse is a full-stack web application for building and managing a personal c
 - **Content Types** – Organize by type: Movie, Anime, K-Drama (filter on the home page)
 - **Import from TMDB** – Search and import movies with metadata (poster, overview, genres) from [The Movie Database](https://www.themoviedb.org/)
 - **Import from AniList** – Search and import anime with poster and genres from [AniList](https://anilist.co/)
+- **Backfill anime descriptions** – One-shot API to fetch missing descriptions from AniList by `externalId` (for older imports / recommendations)
 - **Manual Entry** – Add titles with poster (file upload or URL), genres, and type
 - **Genres** – Genres are stored and shown on cards and movie detail
 - **Reviews** – Add and update reviews (with rating) for any title
@@ -99,6 +100,7 @@ npm run dev
 | `POST` | `/moviemuse/tmdb/import/{tmdbId}` | Import a movie from TMDB by ID |
 | `GET` | `/moviemuse/anilist/search/anime?query=...` | Search AniList anime |
 | `POST` | `/moviemuse/anilist/import` | Import an anime (body: AniList anime object) |
+| `POST` | `/moviemuse/anilist/backfill-descriptions` | Fill `description` for ANILIST anime where it is null (calls AniList by id) |
 | `POST` | `/moviemuse/review` | Create a review |
 | `PUT` | `/moviemuse/review/{id}` | Update a review |
 
