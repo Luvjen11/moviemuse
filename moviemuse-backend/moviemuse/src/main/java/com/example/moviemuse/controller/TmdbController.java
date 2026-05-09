@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
+import com.example.moviemuse.dto.tmdb.TmdbTvSearchResponse;
 import org.springframework.http.HttpStatus;
 
 @RestController
@@ -38,7 +38,19 @@ public class TmdbController {
     @PostMapping("/import/{tmdbId}")
     public ResponseEntity<Movie> importMovie(@PathVariable Long tmdbId) {
         var details = tmdbService.getMovieDetails(tmdbId);
-        var saved = movieService.importFromTmdb(details);
+        var saved = movieService.importFromTmdbMovie(details);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+    @GetMapping("/search/tv")
+    public ResponseEntity<TmdbTvSearchResponse> searchTv(@RequestParam String query) {
+        return ResponseEntity.ok(tmdbService.searchTvShows(query));
+    }
+
+    @PostMapping("/import/tv/{tmdbId}")
+    public ResponseEntity<Movie> importTvShow(@PathVariable Long tmdbId) {
+        var details = tmdbService.getTvShowDetails(tmdbId);
+        var saved = movieService.importFromTmdbTvShow(details);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 }
