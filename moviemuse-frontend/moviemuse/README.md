@@ -26,3 +26,15 @@ import pandas
 load your JSON/CSV
 preview first rows
 check null values
+
+## Clean data
+
+## Create one combined text field
+
+## Vectoriazation 
+
+## Generate the TF-IDF matrix
+
+## Compute cosine similarity
+
+## Build a recommendation function
