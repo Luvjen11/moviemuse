@@ -1,31 +1,96 @@
 package com.example.moviemuse.service;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import com.example.moviemuse.model.Movie;
-import com.example.moviemuse.model.ContentType;
-import com.example.moviemuse.repository.MovieRepository;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import com.example.moviemuse.dto.BackfillResultDto;
 import com.example.moviemuse.dto.MovieDTO;
 import com.example.moviemuse.dto.anime.AniListAnime;
 import com.example.moviemuse.dto.tmdb.TmdbMovieDetails;
-
+import com.example.moviemuse.model.ContentType;
+import com.example.moviemuse.model.Movie;
+import com.example.moviemuse.repository.MovieRepository;
 
 @Service
 public class MovieService {
-    
-    @Autowired
-    private MovieRepository movieRepository;
+
+    private final MovieRepository movieRepository;
+    private final AniListService aniListService;
+
+    @Value("${anilist.backfill.delay-ms:1500}")
+    private long anilistBackfillDelayMs;
+
+    @Value("${anilist.backfill.max-description-chars:60000}")
+    private int maxDescriptionChars;
+
+    /** MySQL TEXT = 65535 bytes max; stay under with UTF-8 (emoji-heavy text needs byte cap, not just char cap). */
+    @Value("${anilist.backfill.max-description-utf8-bytes:65000}")
+    private int maxDescriptionUtf8Bytes;
+
+    public MovieService(MovieRepository movieRepository, AniListService aniListService) {
+        this.movieRepository = movieRepository;
+        this.aniListService = aniListService;
+    }
+
+    /**
+     * Keeps descriptions under MySQL limits: TEXT is max 65535 bytes UTF-8.
+     * Char-only caps (e.g. 60000) can still exceed byte limit with CJK/emoji.
+     */
+    private String truncateDescription(String description) {
+        if (description == null) {
+            return null;
+        }
+        String t = description.trim();
+        if (t.length() > maxDescriptionChars) {
+            t = t.substring(0, maxDescriptionChars);
+        }
+        byte[] utf8 = t.getBytes(StandardCharsets.UTF_8);
+        if (utf8.length <= maxDescriptionUtf8Bytes) {
+            return t;
+        }
+        int low = 0;
+        int high = t.length();
+        while (low < high) {
+            int mid = (low + high + 1) / 2;
+            String sub = t.substring(0, mid);
+            if (sub.getBytes(StandardCharsets.UTF_8).length <= maxDescriptionUtf8Bytes) {
+                low = mid;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return t.substring(0, low);
+    }
+
+    private AniListAnime getAnimeByIdWith429Retry(int aniId, BackfillResultDto result) throws InterruptedException {
+        final int maxAttempts = 4;
+        long backoffMs = 30_000L;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                return aniListService.getAnimeById(aniId);
+            } catch (WebClientResponseException e) {
+                if (e.getStatusCode().value() == 429 && attempt < maxAttempts) {
+                    result.getMessages().add("anilistId=" + aniId + ": rate limited (429), waiting " + (backoffMs / 1000) + "s before retry " + (attempt + 1) + "/" + maxAttempts);
+                    Thread.sleep(backoffMs);
+                    backoffMs = Math.min(backoffMs * 2, 120_000L);
+                    continue;
+                }
+                throw e;
+            }
+        }
+        return null;
+    }
 
     // Find all movies
     public List<Movie> findAllMovies() {
@@ -46,7 +111,7 @@ public class MovieService {
         movie.setType(ContentType.ANIME);
         movie.setStatus("PLANNING");
         movie.setInWatchlist(false);
-        movie.setDescription(a.getDescription());
+        movie.setDescription(truncateDescription(a.getDescription()));
         return movieRepository.save(movie);
     }
 
@@ -148,5 +213,52 @@ public class MovieService {
         Movie movie = movieRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
         movieRepository.delete(movie);
+    }
+
+    /**
+     * For each ANILIST anime with null description, fetch details from AniList by externalId and save description.
+     * Throttles requests (see anilist.backfill.delay-ms) and retries on HTTP 429.
+     */
+    public BackfillResultDto backfillMissingAnilistDescriptions() {
+        List<Movie> toFix = movieRepository.findBySourceAndTypeAndDescriptionIsNull("ANILIST", ContentType.ANIME);
+        BackfillResultDto result = new BackfillResultDto();
+
+        for (Movie m : toFix) {
+            if (m.getExternalId() == null || m.getExternalId().isBlank()) {
+                result.setFailed(result.getFailed() + 1);
+                result.getMessages().add("movieId=" + m.getId() + ": missing externalId");
+                continue;
+            }
+            try {
+                int aniId = Integer.parseInt(m.getExternalId().trim());
+                AniListAnime details = getAnimeByIdWith429Retry(aniId, result);
+                if (details == null) {
+                    result.setSkipped(result.getSkipped() + 1);
+                    result.getMessages().add("movieId=" + m.getId() + " anilistId=" + aniId + ": Media not found");
+                    continue;
+                }
+                String desc = details.getDescription();
+                if (desc == null || desc.isBlank()) {
+                    result.setSkipped(result.getSkipped() + 1);
+                    result.getMessages().add("movieId=" + m.getId() + " anilistId=" + aniId + ": empty description from API");
+                    continue;
+                }
+                m.setDescription(truncateDescription(desc));
+                movieRepository.save(m);
+                result.setUpdated(result.getUpdated() + 1);
+                Thread.sleep(anilistBackfillDelayMs);
+            } catch (NumberFormatException e) {
+                result.setFailed(result.getFailed() + 1);
+                result.getMessages().add("movieId=" + m.getId() + ": invalid externalId '" + m.getExternalId() + "'");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                result.getMessages().add("Interrupted after " + result.getUpdated() + " updates");
+                break;
+            } catch (Exception e) {
+                result.setFailed(result.getFailed() + 1);
+                result.getMessages().add("movieId=" + m.getId() + ": " + e.getMessage());
+            }
+        }
+        return result;
     }
 }

@@ -168,3 +168,23 @@ export const deleteMovie = async (movieId) => {
     }
   }
 };
+
+export const getRecommendationsByMovieId = async (movieId, opts = {}) => {
+  const topN = opts.topN ?? 10;
+  const excludeTitle = opts.excludeTitle ?? true;
+  try {
+    const response = await api.get(`/recommendations/${movieId}`, {
+      params: { topN, excludeTitle },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Get recommendations by movie ID error:", error);
+    if (error.response) {
+      throw new Error(`Server Error: ${error.response.status}`);
+    } else if (error.request) {
+      throw new Error("Network Error");
+    } else {
+      throw new Error("Request configuration Error");
+    }
+  }
+};

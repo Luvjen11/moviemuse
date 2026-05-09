@@ -46,7 +46,7 @@ public class Movie {
 
     private String status;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String description;
 
     private Boolean inWatchlist = false;
