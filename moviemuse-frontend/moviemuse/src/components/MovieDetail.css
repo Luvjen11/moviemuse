@@ -191,3 +191,56 @@
     font-size: 1.8rem;
   }
 }
+
+.movie-recommendations-section {
+  background-color: white;
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.recommendations-title {
+  color: #ff80bf;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.recommendations-hint {
+  color: #666666;
+  font-size: 0.95rem;
+}
+
+.recommendations-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.recommendation-card {
+  width: 120px;
+  flex: 0 0 auto;
+  text-align: center;
+}
+
+.recommendation-image {
+  width: 120px;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+  margin: 0 auto 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.recommendation-title {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: #333333;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

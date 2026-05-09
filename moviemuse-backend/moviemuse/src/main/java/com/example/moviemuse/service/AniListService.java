@@ -1,12 +1,14 @@
 package com.example.moviemuse.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.http.HttpHeaders;
-
 import java.util.Map;
 
-import com.example.moviemuse.dto.anime.AniListResponse; // ensure this import exists
+import org.springframework.http.HttpHeaders;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import com.example.moviemuse.dto.anime.AniListAnime;
+import com.example.moviemuse.dto.anime.AniListByIdResponse;
+import com.example.moviemuse.dto.anime.AniListResponse;
 
 @Service
 public class AniListService {
@@ -21,8 +23,7 @@ public class AniListService {
             .build();
     }
 
-    public AniListResponse searchAnime(String query) { // changed return type to AniListResponse
-
+    public AniListResponse searchAnime(String query) {
         Map<String, Object> body = Map.of(
             "query", """
                         query ($search: String) {
@@ -38,6 +39,7 @@ public class AniListService {
                                     large
                                   }
                                   genres
+                                  description(asHtml: false)
                                 }
                             }
                         }
@@ -48,7 +50,43 @@ public class AniListService {
         return webClient.post()
                 .bodyValue(body)
                 .retrieve()
-                .bodyToMono(AniListResponse.class) // return AniListResponse
+                .bodyToMono(AniListResponse.class)
                 .block();
+    }
+
+    /**
+     * Full anime details by AniList media id (GraphQL: Media(id, type: ANIME)).
+     */
+    public AniListAnime getAnimeById(int anilistMediaId) {
+        Map<String, Object> body = Map.of(
+                "query", """
+                        query ($id: Int) {
+                            Media(id: $id, type: ANIME) {
+                                id
+                                title {
+                                    english
+                                    romaji
+                                }
+                                episodes
+                                coverImage {
+                                    large
+                                }
+                                genres
+                                description(asHtml: false)
+                            }
+                        }
+                        """,
+                "variables", Map.of("id", anilistMediaId));
+
+        AniListByIdResponse response = webClient.post()
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(AniListByIdResponse.class)
+                .block();
+
+        if (response == null || response.getData() == null) {
+            return null;
+        }
+        return response.getData().getMedia();
     }
 }

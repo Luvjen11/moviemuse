@@ -3,6 +3,7 @@ package com.example.moviemuse.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.moviemuse.model.Movie;
 import com.example.moviemuse.model.ContentType;
 import com.example.moviemuse.service.MovieService;
+import com.example.moviemuse.dto.BackfillResultDto;
 import com.example.moviemuse.dto.MovieDTO;
 import com.example.moviemuse.dto.anime.AniListAnime;
 
@@ -41,6 +43,14 @@ public class MovieController {
     @PostMapping("/anilist/import")
     public ResponseEntity<Movie> importAniListMovie(@RequestBody AniListAnime aniListAnime) {
         return ResponseEntity.status(HttpStatus.CREATED).body(movieService.importFromAniList(aniListAnime));
+    }
+
+    /**
+     * Backfill description for ANILIST anime where description is null (calls AniList API by externalId).
+     */
+    @PostMapping("/anilist/backfill-descriptions")
+    public ResponseEntity<BackfillResultDto> postAnilistDescriptionBackfill() {
+        return ResponseEntity.ok(movieService.backfillMissingAnilistDescriptions());
     }
 
     // Create a new movie (JSON only)
