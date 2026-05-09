@@ -27,6 +27,24 @@
     margin-bottom: 12px;
   }
 
+  .tmdb-results-group {
+    margin-top: 10px;
+  }
+
+  .tmdb-results-group--divider {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid #ffd6ea;
+  }
+
+  .tmdb-results-label {
+    margin: 0 0 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #ff80bf;
+    letter-spacing: 0.02em;
+  }
+
   .tmdb-search-row {
     display: flex;
     gap: 10px;
@@ -99,6 +117,12 @@
     object-fit: cover;
     border-radius: 6px;
     flex-shrink: 0;
+  }
+
+  .tmdb-result-poster--empty {
+    background: #f5f5f5;
+    border: 1px dashed #e5e5e5;
+    box-sizing: border-box;
   }
 
   .tmdb-result-title {

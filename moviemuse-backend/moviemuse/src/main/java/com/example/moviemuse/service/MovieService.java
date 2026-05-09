@@ -18,6 +18,7 @@ import com.example.moviemuse.dto.BackfillResultDto;
 import com.example.moviemuse.dto.MovieDTO;
 import com.example.moviemuse.dto.anime.AniListAnime;
 import com.example.moviemuse.dto.tmdb.TmdbMovieDetails;
+import com.example.moviemuse.dto.tmdb.TmdbTvDetails;
 import com.example.moviemuse.model.ContentType;
 import com.example.moviemuse.model.Movie;
 import com.example.moviemuse.repository.MovieRepository;
@@ -116,7 +117,7 @@ public class MovieService {
     }
 
     // import from TMDB (idempotent: returns existing if already imported)
-    public Movie importFromTmdb(TmdbMovieDetails d) {
+    public Movie importFromTmdbMovie(TmdbMovieDetails d) {
         String externalId = String.valueOf(d.getId());
         Optional<Movie> existing = movieRepository.findByExternalIdAndSource(externalId, "TMDB");
         if (existing.isPresent()) {
@@ -126,13 +127,48 @@ public class MovieService {
         Movie movie = new Movie();
         movie.setTitle(d.getTitle() != null ? d.getTitle() : "Unknown");
         movie.setEpisodes(0);
-        // Truncate if DB column is still VARCHAR(255); safe for TEXT too
-        String overview = d.getOverview();
-        final int maxDesc = 255;
-        movie.setDescription(overview == null ? null : (overview.length() > maxDesc ? overview.substring(0, maxDesc) : overview));
+        movie.setDescription(truncateDescription(d.getOverview()));
         movie.setExternalId(externalId);
         movie.setSource("TMDB");
         movie.setType(ContentType.MOVIE);
+        movie.setStatus("PLANNING");
+        movie.setInWatchlist(false);
+
+        if (d.getPosterPath() != null && !d.getPosterPath().isBlank()) {
+            movie.setImageURL("https://image.tmdb.org/t/p/w500" + d.getPosterPath());
+        } else {
+            movie.setImageURL(null);
+        }
+
+        // genres: never null, no null names (avoids NOT NULL constraint on join table)
+        if (d.getGenres() != null && !d.getGenres().isEmpty()) {
+            List<String> names = d.getGenres().stream()
+                .map(g -> g != null ? g.getName() : null)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+            movie.setGenres(names);
+        } else {
+            movie.setGenres(new ArrayList<>());
+        }
+
+        return movieRepository.save(movie);
+    }
+
+    // import from TMDB (idempotent: returns existing if already imported)
+    public Movie importFromTmdbTvShow(TmdbTvDetails d) {
+        String externalId = String.valueOf(d.getId());
+        Optional<Movie> existing = movieRepository.findByExternalIdAndSource(externalId, "TMDB_TV");
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+
+        Movie movie = new Movie();
+        movie.setTitle(d.getName() != null ? d.getName() : "Unknown");
+        movie.setEpisodes(d.getNumberOfEpisodes() != null ? d.getNumberOfEpisodes() : 0);
+        movie.setDescription(truncateDescription(d.getOverview()));
+        movie.setExternalId(externalId);
+        movie.setSource("TMDB_TV");
+        movie.setType(ContentType.KDRAMA);
         movie.setStatus("PLANNING");
         movie.setInWatchlist(false);
 

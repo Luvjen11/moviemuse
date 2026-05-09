@@ -7,6 +7,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.example.moviemuse.dto.tmdb.TmdbMovieDetails;
 import com.example.moviemuse.dto.tmdb.TmdbSearchResponse;
+import com.example.moviemuse.dto.tmdb.TmdbTvDetails;
+import com.example.moviemuse.dto.tmdb.TmdbTvSearchResponse;
 
 @Service
 public class TmdbService {
@@ -47,6 +49,32 @@ public class TmdbService {
             )
             .retrieve()
             .bodyToMono(TmdbMovieDetails.class)
+            .block();
+    }
+
+    public TmdbTvSearchResponse searchTvShows(String query) {
+        return webClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/search/tv")
+                .queryParam("api_key", apiKey)
+                .queryParam("query", query)
+                .queryParam("include_adult", "false")
+                .build()
+            )
+            .retrieve()
+            .bodyToMono(TmdbTvSearchResponse.class)
+            .block();
+    }
+
+    public TmdbTvDetails getTvShowDetails(Long tmdbId) {
+        return webClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/tv/{id}")
+                .queryParam("api_key", apiKey)
+                .build(tmdbId)
+            )
+            .retrieve()
+            .bodyToMono(TmdbTvDetails.class)
             .block();
     }
 

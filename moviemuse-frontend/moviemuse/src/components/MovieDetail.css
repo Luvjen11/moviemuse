@@ -63,6 +63,34 @@
   color: #666666;
 }
 
+.movie-description-section {
+  background-color: white;
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.movie-info .movie-description-section {
+  margin-top: 12px;
+  margin-bottom: 15px;
+  padding: 18px 20px;
+}
+
+.movie-description-title {
+  color: #ff80bf;
+  margin-bottom: 14px;
+  font-size: 1.35rem;
+}
+
+.movie-description-text {
+  margin: 0;
+  line-height: 1.65;
+  color: #444;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .movie-reviews-section {
   background-color: white;
   border-radius: 15px;
