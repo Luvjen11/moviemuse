@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getMovieById } from '../services/api';
+import { getMovieById, getRecommendationsByMovieId } from '../services/api';
 import './MovieDetail.css';
 
 const MovieDetail = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
+  const [recommendations, setRecommendations] = useState([]);
+  const [recsLoading, setRecsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -23,6 +25,32 @@ const MovieDetail = () => {
     };
     
     fetchMovie();
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    const fetchRecs = async () => {
+      setRecsLoading(true);
+      try {
+        const data = await getRecommendationsByMovieId(id, {
+          topN: 10,
+          excludeTitle: true,
+        });
+        if (!cancelled) {
+          setRecommendations(Array.isArray(data?.recommendations) ? data.recommendations : []);
+        }
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) setRecommendations([]);
+      } finally {
+        if (!cancelled) setRecsLoading(false);
+      }
+    };
+    fetchRecs();
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
   
   if (loading) {
@@ -101,6 +129,36 @@ const MovieDetail = () => {
         <Link to={`/movie/${movie.id}/add-review`} className="add-review-button">
           Add Review
         </Link>
+      </div>
+
+      <div className="movie-recommendations-section">
+        <h2 className="recommendations-title">Recommendations</h2>
+        {recsLoading ? (
+          <p className="recommendations-hint">Loading suggestions…</p>
+        ) : recommendations.length === 0 ? (
+          <p className="recommendations-hint">
+            No recommendations right now (is the Python recommender running on port 8001?).
+          </p>
+        ) : (
+          <div className="recommendations-list">
+            {recommendations.map((rec) => (
+              <div
+                key={rec.anilistId ?? rec.title}
+                className="recommendation-card"
+              >
+                <img
+                  src={
+                    rec.imageUrl ||
+                    'https://via.placeholder.com/120x170?text=No+Poster'
+                  }
+                  alt={rec.title}
+                  className="recommendation-image"
+                />
+                <p className="recommendation-title">{rec.title}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       
       <Link to="/" className="back-to-home">
