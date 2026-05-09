@@ -54,6 +54,17 @@ export const importTmdbMovie = async (tmdbId) => {
   return res.data;
 };
 
+export const searchTvShows = async (query) => {
+  if (!query) return [];
+  const res = await api.get("/tmdb/search/tv", { params: { query } });
+  return res.data?.results ?? [];
+};
+
+export const importTmdbTvShow = async (tmdbId) => {
+  if (!tmdbId) throw new Error("No tv show to import");
+  const res = await api.post(`/tmdb/import/tv/${tmdbId}`);
+  return res.data;
+};
 
 export const createMovie = async (movieData) => {
     try {

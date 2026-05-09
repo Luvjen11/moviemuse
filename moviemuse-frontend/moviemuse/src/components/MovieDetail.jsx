@@ -99,6 +99,15 @@ const MovieDetail = () => {
               <span key={index} className="genre-tag">{genre}</span>
             ))}
           </div>
+
+          {movie.description && movie.description.trim() !== '' && (
+            <section className="movie-description-section" aria-labelledby="movie-overview-heading">
+              <h2 id="movie-overview-heading" className="movie-description-title">
+                Overview
+              </h2>
+              <p className="movie-description-text">{movie.description}</p>
+            </section>
+          )}
           
           <div className="movie-categories">
             {movie.category && movie.category.map((category, index) => (

@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './NewMovie.css';
-import { createMovie, searchAnime, importAnime, searchMovies, importTmdbMovie } from '../services/api';
+import { createMovie, searchAnime, importAnime, searchMovies, importTmdbMovie, searchTvShows, importTmdbTvShow } from '../services/api';
 
 const NewMovie = () => {
   const navigate = useNavigate();
   const [tmdbQuery, setTmdbQuery] = useState('');
-  const [tmdbResults, setTmdbResults] = useState([]);
+  const [tmdbMovieResults, setTmdbMovieResults] = useState([]);
+  const [tmdbTvShowResults, setTmdbTvShowResults] = useState([]);
   const [tmdbSearching, setTmdbSearching] = useState(false);
   const [tmdbError, setTmdbError] = useState('');
-  const [importingTmdbId, setImportingTmdbId] = useState(null);
+  const [importingTmdbMovieId, setImportingTmdbMovieId] = useState(null);
+  const [importingTmdbTvShowId, setImportingTmdbTvShowId] = useState(null);
   const [anilistQuery, setAnilistQuery] = useState('');
   const [anilistResults, setAnilistResults] = useState([]);
   const [anilistSearching, setAnilistSearching] = useState(false);
@@ -84,15 +86,19 @@ const NewMovie = () => {
 
   const handleTmdbSearch = async () => {
     setTmdbError('');
-    setTmdbResults([]);
+    setTmdbMovieResults([]);
+    setTmdbTvShowResults([]);
     if (!tmdbQuery.trim()) return;
     setTmdbSearching(true);
     try {
       const results = await searchMovies(tmdbQuery);
-      setTmdbResults(Array.isArray(results) ? results : []);
+      setTmdbMovieResults(Array.isArray(results) ? results : []);
+      const tvResults = await searchTvShows(tmdbQuery);
+      setTmdbTvShowResults(Array.isArray(tvResults) ? tvResults : []);
     } catch (err) {
       setTmdbError(err.message || 'Search failed');
-      setTmdbResults([]);
+      setTmdbMovieResults([]);
+      setTmdbTvShowResults([]);
     } finally {
       setTmdbSearching(false);
     }
@@ -100,14 +106,27 @@ const NewMovie = () => {
 
   const handleImportTmdbMovie = async (tmdbId) => {
     setTmdbError('');
-    setImportingTmdbId(tmdbId);
+    setImportingTmdbMovieId(tmdbId);
     try {
       await importTmdbMovie(tmdbId);
       navigate('/');
     } catch (err) {
       setTmdbError(err.message || 'Import failed');
     } finally {
-      setImportingTmdbId(null);
+      setImportingTmdbMovieId(null);
+    }
+  };
+
+  const handleImportTmdbTvShow = async (tmdbId) => {
+    setTmdbError('');
+    setImportingTmdbTvShowId(tmdbId);
+    try {
+      await importTmdbTvShow(tmdbId);
+      navigate('/');
+    } catch (err) {
+      setTmdbError(err.message || 'Import failed');
+    } finally {
+      setImportingTmdbTvShowId(null);
     }
   };
 
@@ -222,9 +241,9 @@ const NewMovie = () => {
           </button>
         </div>
         {tmdbError && <div className="error-message">{tmdbError}</div>}
-        {tmdbResults.length > 0 && (
+        {tmdbMovieResults.length > 0 && (
           <ul className="tmdb-results-list">
-            {tmdbResults.map((m) => (
+            {tmdbMovieResults.map((m) => (
               <li key={m.id} className="tmdb-result-item">
                 <div className="tmdb-result-info">
                   {tmdbPosterUrl(m.posterPath) && (
@@ -241,9 +260,36 @@ const NewMovie = () => {
                   type="button"
                   className="tmdb-import-button"
                   onClick={() => handleImportTmdbMovie(m.id)}
-                  disabled={importingTmdbId !== null}
+                  disabled={importingTmdbMovieId !== null}
                 >
-                  {importingTmdbId === m.id ? 'Importing...' : 'Import'}
+                  {importingTmdbMovieId === m.id ? 'Importing...' : 'Import'}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {tmdbTvShowResults.length > 0 && (
+          <ul className="tmdb-results-list">
+            {tmdbTvShowResults.map((t) => (
+              <li key={t.id} className="tmdb-result-item">
+                <div className="tmdb-result-info">
+                  {tmdbPosterUrl(t.posterPath) && (
+                    <img src={tmdbPosterUrl(t.posterPath)} alt="" className="tmdb-result-poster" />
+                  )}
+                  <div>
+                    <span className="tmdb-result-title">{t.name || 'Unknown'}</span>
+                    {t.firstAirDate && t.firstAirDate.length >= 4 && (
+                      <span className="tmdb-result-meta"> · {t.firstAirDate.slice(0, 4)}</span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="tmdb-import-button"
+                  onClick={() => handleImportTmdbTvShow(t.id)}
+                  disabled={importingTmdbTvShowId !== null}
+                >
+                  {importingTmdbTvShowId === t.id ? 'Importing...' : 'Import'}
                 </button>
               </li>
             ))}
