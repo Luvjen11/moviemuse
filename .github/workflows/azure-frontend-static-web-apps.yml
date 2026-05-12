@@ -1,0 +1,50 @@
+# Build Vite React in GitHub Actions, then upload dist to Azure Static Web Apps (no Oryx/npm on Azure).
+# Add repo secret: AZURE_STATIC_WEB_APPS_API_TOKEN (Static Web App → Manage deployment token).
+# Disable or delete the workflow Azure created in this repo to avoid duplicate runs.
+name: Frontend — build & deploy to Azure Static Web Apps
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "moviemuse-frontend/moviemuse/**"
+      - ".github/workflows/azure-frontend-static-web-apps.yml"
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: moviemuse-frontend/moviemuse/package-lock.json
+
+      - name: Install & build
+        working-directory: moviemuse-frontend/moviemuse
+        run: npm ci && npm run build
+
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          # Pre-built site only — Oryx does not run npm install
+          app_location: /
+          skip_app_build: true
+          skip_api_build: true
+          app_artifact_location: moviemuse-frontend/moviemuse/dist
