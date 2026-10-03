@@ -16,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.BatchSize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -42,6 +43,7 @@ public class Movie {
     @ElementCollection
     @CollectionTable(name = "movie_genres", joinColumns = @JoinColumn(name = "movie_id"))
     @Column(name = "genre")
+    @BatchSize(size = 50)
     private List<String> genres = new ArrayList<>();
 
     private String status;
@@ -55,6 +57,7 @@ public class Movie {
     private ContentType type;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     private List<Review> reviews;
 
 }

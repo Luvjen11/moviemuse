@@ -23,6 +23,7 @@ import com.example.moviemuse.model.ContentType;
 import com.example.moviemuse.service.MovieService;
 import com.example.moviemuse.dto.BackfillResultDto;
 import com.example.moviemuse.dto.MovieDTO;
+import com.example.moviemuse.dto.MovieSummaryDto;
 import com.example.moviemuse.dto.anime.AniListAnime;
 
 @RestController
@@ -34,8 +35,10 @@ public class MovieController {
     private MovieService movieService;
 
     @GetMapping
-    public ResponseEntity<List<Movie>> getAllMovies() {
-        List<Movie> movies = movieService.findAllMovies();
+    public ResponseEntity<List<MovieSummaryDto>> getAllMovies() {
+        List<MovieSummaryDto> movies = movieService.findAllMovies().stream()
+                .map(MovieSummaryDto::from)
+                .toList();
         return new ResponseEntity<>(movies, HttpStatus.OK);
     }
 
