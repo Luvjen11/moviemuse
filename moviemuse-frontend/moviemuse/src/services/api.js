@@ -186,6 +186,7 @@ export const getRecommendationsByMovieId = async (movieId, opts = {}) => {
   try {
     const response = await api.get(`/recommendations/${movieId}`, {
       params: { topN, excludeTitle },
+      timeout: 90000,
     });
     return response.data;
   } catch (error) {

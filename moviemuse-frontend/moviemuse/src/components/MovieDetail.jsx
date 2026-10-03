@@ -8,6 +8,7 @@ const MovieDetail = () => {
   const [movie, setMovie] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [recsLoading, setRecsLoading] = useState(true);
+  const [recsWakingUp, setRecsWakingUp] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -30,8 +31,10 @@ const MovieDetail = () => {
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
+    const wakeTimer = window.setTimeout(() => setRecsWakingUp(true), 1800);
     const fetchRecs = async () => {
       setRecsLoading(true);
+      setRecsWakingUp(false);
       try {
         const data = await getRecommendationsByMovieId(id, {
           topN: 10,
@@ -44,7 +47,9 @@ const MovieDetail = () => {
         console.error(err);
         if (!cancelled) setRecommendations([]);
       } finally {
+        window.clearTimeout(wakeTimer);
         if (!cancelled) setRecsLoading(false);
+        if (!cancelled) setRecsWakingUp(false);
       }
     };
     fetchRecs();
@@ -143,7 +148,11 @@ const MovieDetail = () => {
       <div className="movie-recommendations-section">
         <h2 className="recommendations-title">Recommendations</h2>
         {recsLoading ? (
-          <p className="recommendations-hint">Loading suggestions…</p>
+          <p className="recommendations-hint">
+            {recsWakingUp
+              ? 'Wakie wakie, recommendation engine...'
+              : 'Loading suggestions...'}
+          </p>
         ) : recommendations.length === 0 ? (
           <p className="recommendations-hint">
             No recommendations right now (is the Python recommender running on port 8001?).

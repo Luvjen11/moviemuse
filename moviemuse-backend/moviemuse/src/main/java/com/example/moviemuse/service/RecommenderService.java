@@ -41,7 +41,7 @@ public class RecommenderService {
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(RecommendationResponseDto.class)
-                .timeout(Duration.ofSeconds(10))
+                .timeout(Duration.ofSeconds(60))
                 .block();
     }
 }
