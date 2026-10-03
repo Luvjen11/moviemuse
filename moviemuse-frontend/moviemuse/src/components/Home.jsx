@@ -7,6 +7,7 @@ import "./Home.css";
 const Home = () => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isWakingUp, setIsWakingUp] = useState(false);
   const [error, setError] = useState(null);
   const [deleteLoading,setDeleteLoading] = useState(null);
   const [filterType, setFilterType] = useState("ALL");
@@ -16,8 +17,11 @@ const Home = () => {
   }, []);
 
   const getMovies = async () => {
+    const wakeTimer = window.setTimeout(() => setIsWakingUp(true), 1800);
+
     try {
       setLoading(true);
+      setIsWakingUp(false);
       const data = await getAllMovies();
       setMovies(data);
       setError(null);
@@ -25,7 +29,9 @@ const Home = () => {
       setError(error.message || "Something went wrong");
       console.error("Error fetching movies:", error);
     } finally {
+      window.clearTimeout(wakeTimer);
       setLoading(false);
+      setIsWakingUp(false);
     }
   };
 
@@ -97,9 +103,12 @@ const Home = () => {
         <section className="movie-section">
           <h2 className="section-title">All Movies</h2>
           {loading ? (
-            <div className="loading-container">
-              <div className="loading-spinner"></div>
-              <p>Loading your collection...</p>
+            <div className="loading-container" role="status" aria-live="polite">
+              <div className="loading-spinner" aria-hidden="true"></div>
+              <p className="loading-title">
+                {isWakingUp ? "Wakie wakie, little server..." : "Loading your collection..."}
+              </p>
+              {isWakingUp && <p className="loading-detail">Render is getting things moving.</p>}
             </div>
           ) : error ? (
             <div className="error-message">{error}</div>

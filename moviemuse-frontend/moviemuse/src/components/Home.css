@@ -145,6 +145,19 @@
     padding: 50px 0;
     color: #666666;
   }
+
+  .loading-title {
+    margin: 0;
+    font-weight: 600;
+    color: #555555;
+    animation: loading-pulse 1.8s ease-in-out infinite;
+  }
+
+  .loading-detail {
+    margin: 8px 0 0;
+    color: #888888;
+    font-size: 0.9rem;
+  }
   
   .loading-spinner {
     width: 40px;
@@ -159,6 +172,11 @@
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+  }
+
+  @keyframes loading-pulse {
+    0%, 100% { opacity: 0.65; }
+    50% { opacity: 1; }
   }
   
   .no-movies {
